@@ -1,0 +1,18 @@
+{
+  "background": {"name": null, "file": "./images/background.png", "width": 1584, "height": 396},
+  "bgRgba": {"top": [0, 153, 153, 255], "bottom": [192, 192, 192, 255]},
+  "like": {"name": null, "file": "./images/like.png", "width": 500, "height": 177},
+  "dislike": {"name": null, "file": "./images/dislike.png", "width": 500, "height": 177},
+  "output": {"file":"./images/saved.png", "format": "png"},
+  "likeIcon": [
+    {"name": "go", "file": "./images/tech_icon/go.png", "width": 200, "height": 200},
+    {"name": "python", "file": "./images/tech_icon/python.png", "width": 200, "height": 200},
+    {"name": "react", "file": "./images/tech_icon/react.png", "width": 200, "height": 200},
+    {"name": "docker", "file": "./images/tech_icon/docker.png", "width": 200, "height": 200}
+  ],
+  "dislikeIcon": [
+    {"name": "dotnet", "file": "./images/tech_icon/dotnet.png", "width": 200, "height": 200},
+    {"name": "ruby", "file": "./images/tech_icon/ruby.png", "width": 200, "height": 200},
+    {"name": "java", "file": "./images/tech_icon/java.png", "width": 200, "height": 200}
+  ]
+}

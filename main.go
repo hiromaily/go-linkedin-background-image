@@ -14,6 +14,8 @@ import (
 	"image/jpeg"
 	"image/png"
 
+	"github.com/nfnt/resize"
+
 	lg "github.com/hiromaily/golibs/log"
 )
 
@@ -233,20 +235,39 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 	draw.Draw(rgba, dislikeRectangle, cImgs[2], image.Point{0, 0}, draw.Over)
 
 	//loop
-	x := 530
+	x := 520
+	size, margin := calcSize(len(lImgs), 0)
 	for _, v := range lImgs {
 		xy := image.Point{x, 0}
-		rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
-		draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
-		x += 230
+		if len(lImgs) > 4{
+			//resize
+			vv := resize.Resize(size, size, v, resize.Lanczos3)
+			rRectangle := image.Rectangle{xy, xy.Add(vv.Bounds().Size())}
+			draw.Draw(rgba, rRectangle, vv, image.Point{0, 0}, draw.Over)
+			x += margin
+		}else{
+			//default
+			rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
+			draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
+			x += 230
+		}
 	}
 
 	x = 550
+	size, margin = calcSize(len(dlImgs), -30)
 	for _, v := range dlImgs {
 		xy := image.Point{x, 198}
-		rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
-		draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
-		x += 230
+		if len(dlImgs) > 4{
+			//resize
+			vv := resize.Resize(size, size, v, resize.Lanczos3)
+			rRectangle := image.Rectangle{xy, xy.Add(vv.Bounds().Size())}
+			draw.Draw(rgba, rRectangle, vv, image.Point{0, 0}, draw.Over)
+			x += margin
+		}else {
+			rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
+			draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
+			x += 230
+		}
 	}
 
 	//savedFile := "./images/saved.png"
@@ -265,4 +286,12 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 		//2.png
 		png.Encode(out, rgba)
 	}
+}
+
+func calcSize(num int, adjustment float64) (uint, int){
+	//max size is 1064
+	var baseSize float64 = 1064 + adjustment
+	var wholeW float64 = baseSize / float64(num)
+	w := wholeW / 115.0 * 100.0
+	return uint(w), int(wholeW)
 }

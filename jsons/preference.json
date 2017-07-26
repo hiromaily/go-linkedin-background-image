@@ -8,7 +8,8 @@
     {"name": "go", "file": "./images/tech_icon/go.png", "width": 200, "height": 200},
     {"name": "python", "file": "./images/tech_icon/python.png", "width": 200, "height": 200},
     {"name": "react", "file": "./images/tech_icon/react.png", "width": 200, "height": 200},
-    {"name": "docker", "file": "./images/tech_icon/docker.png", "width": 200, "height": 200}
+    {"name": "docker", "file": "./images/tech_icon/docker.png", "width": 200, "height": 200},
+    {"name": "aws", "file": "./images/tech_icon/aws.png", "width": 200, "height": 200}
   ],
   "dislikeIcon": [
     {"name": "dotnet", "file": "./images/tech_icon/dotnet.png", "width": 200, "height": 200},

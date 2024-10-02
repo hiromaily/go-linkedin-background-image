@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"image"
-	"io/ioutil"
+	"log"
 	"os"
 
 	"image/color"
@@ -15,8 +15,6 @@ import (
 	"image/png"
 
 	"github.com/nfnt/resize"
-
-	lg "github.com/hiromaily/golibs/log"
 )
 
 type Resources struct {
@@ -72,23 +70,21 @@ func init() {
 		return
 	}
 
-	lg.InitializeLog(lg.DebugStatus, lg.LogOff, 99, "[GoImage]", "/var/log/go/goimage.log")
 }
 
 func main() {
 	jsonByte, err := loadJSONFile(*jsonPath)
 	if err != nil {
-		lg.Errorf("After calling loadJSONFile(): %v", err)
+		log.Printf("fail to call loadJSONFile(): %v", err)
 		return
 	}
 
 	var resources Resources
 	err = json.Unmarshal(jsonByte, &resources)
 	if err != nil {
-		lg.Errorf("After calling json.Unmarshal(): %v", err)
+		log.Printf("fail to call json.Unmarshal(): %v", err)
 		return
 	}
-	//lg.Debugf("%#v", resources)
 
 	createBgImage(&resources.Background, &resources.BgRgba)
 
@@ -100,11 +96,10 @@ func main() {
 func loadJSONFile(filePath string) ([]byte, error) {
 	// Loading jsonfile
 	if filePath == "" {
-		err := errors.New("nothing JSON file")
-		return nil, err
+		return nil, errors.New("nothing JSON file")
 	}
 
-	file, err := ioutil.ReadFile(filePath)
+	file, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
@@ -114,18 +109,11 @@ func loadJSONFile(filePath string) ([]byte, error) {
 func createBgImage(bg *Images, rgba *Rgba) {
 	img := image.NewRGBA(image.Rect(0, 0, bg.Width, bg.Height))
 
-	//for x := 0; x <= 1584; x++ {
-	//	for y := 0; y <= 396; y++ {
-	//		img.Set(x, y, color.RGBA{0, 153, 153, 255})
-	//	}
-	//}
 	for x := 0; x < bg.Width; x++ {
 		for y := 0; y < 198; y++ {
-			//img.Set(x, y, color.RGBA{0, 153, 153, 255})
 			img.Set(x, y, color.RGBA{rgba.Top[0], rgba.Top[1], rgba.Top[2], rgba.Top[3]})
 		}
 		for y := 198; y < bg.Height; y++ {
-			//img.Set(x, y, color.RGBA{192, 192, 192, 255})
 			img.Set(x, y, color.RGBA{rgba.Bottom[0], rgba.Bottom[1], rgba.Bottom[2], rgba.Bottom[3]})
 		}
 	}
@@ -141,17 +129,17 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	//1.open file
 	bgFile, err := os.Open(*r.Background.File)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	likeFile, err := os.Open(*r.Like.File)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	dislikeFile, err := os.Open(*r.Dislike.File)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	//1.2 like
@@ -159,7 +147,7 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	for _, v := range r.LikeIcon {
 		file, err := os.Open(*v.File)
 		if err != nil {
-			lg.Fatal(err)
+			log.Fatal(err)
 		}
 		likeFiles = append(likeFiles, file)
 	}
@@ -169,7 +157,7 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	for _, v := range r.DislikeIcon {
 		file, err := os.Open(*v.File)
 		if err != nil {
-			lg.Fatal(err)
+			log.Fatal(err)
 		}
 		dislikeFiles = append(dislikeFiles, file)
 	}
@@ -177,17 +165,17 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	//2.decode background
 	bgImg, _, err := image.Decode(bgFile)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	likeImg, _, err := image.Decode(likeFile)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	dislikeImg, _, err := image.Decode(dislikeFile)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	commonImgs := []image.Image{bgImg, likeImg, dislikeImg}
@@ -197,7 +185,7 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	for _, v := range likeFiles {
 		img, _, err := image.Decode(v)
 		if err != nil {
-			lg.Fatal(err)
+			log.Fatal(err)
 		}
 		likeImgs = append(likeImgs, img)
 	}
@@ -207,7 +195,7 @@ func getImages(r *Resources) ([]image.Image, []image.Image, []image.Image) {
 	for _, v := range dislikeFiles {
 		img, _, err := image.Decode(v)
 		if err != nil {
-			lg.Fatal(err)
+			log.Fatal(err)
 		}
 		dislikeImgs = append(dislikeImgs, img)
 	}
@@ -239,13 +227,13 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 	size, margin := calcSize(len(lImgs), 0)
 	for _, v := range lImgs {
 		xy := image.Point{x, 0}
-		if len(lImgs) > 4{
+		if len(lImgs) > 4 {
 			//resize
 			vv := resize.Resize(size, size, v, resize.Lanczos3)
 			rRectangle := image.Rectangle{xy, xy.Add(vv.Bounds().Size())}
 			draw.Draw(rgba, rRectangle, vv, image.Point{0, 0}, draw.Over)
 			x += margin
-		}else{
+		} else {
 			//default
 			rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
 			draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
@@ -257,13 +245,13 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 	size, margin = calcSize(len(dlImgs), -30)
 	for _, v := range dlImgs {
 		xy := image.Point{x, 198}
-		if len(dlImgs) > 4{
+		if len(dlImgs) > 4 {
 			//resize
 			vv := resize.Resize(size, size, v, resize.Lanczos3)
 			rRectangle := image.Rectangle{xy, xy.Add(vv.Bounds().Size())}
 			draw.Draw(rgba, rRectangle, vv, image.Point{0, 0}, draw.Over)
 			x += margin
-		}else {
+		} else {
 			rRectangle := image.Rectangle{xy, xy.Add(v.Bounds().Size())}
 			draw.Draw(rgba, rRectangle, v, image.Point{0, 0}, draw.Over)
 			x += 230
@@ -273,7 +261,7 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 	//savedFile := "./images/saved.png"
 	out, err := os.Create(*saved.File)
 	if err != nil {
-		lg.Fatal(err)
+		log.Fatal(err)
 	}
 
 	switch *saved.Format {
@@ -288,7 +276,7 @@ func composeImage(saved *OutImages, cImgs, lImgs, dlImgs []image.Image) {
 	}
 }
 
-func calcSize(num int, adjustment float64) (uint, int){
+func calcSize(num int, adjustment float64) (uint, int) {
 	//max size is 1064
 	var baseSize float64 = 1064 + adjustment
 	var wholeW float64 = baseSize / float64(num)

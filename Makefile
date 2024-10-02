@@ -1,7 +1,14 @@
-genjson:
-	gogentype -file $(PWD)/jsons/preference.json
+# .PHONY: gen-json
+# gen-json:
+# 	gogentype -file $(PWD)/jsons/preference.json
 
-bld:
+.PHONY: lint
+lint:
+	go fmt ./...
+	go vet ./...
+
+.PHONY: build
+build:
 	go build -i -v -o ${GOPATH}/bin/goimage main.go
 
 run:
